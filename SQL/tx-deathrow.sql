@@ -64,7 +64,7 @@ AND Last_Name LIKE '%az%';
 
 /*2 #s needed to calculate proportion*/
 /*Numerator - # of executions w/ claims of innocence
-Denominator - Total excutions
+Denominator - Total executions
 Since numerator and denominator need info from multiple rows  = need aggregate function
 Aggregate - Combine multiple elements into a whole
 Aggregate functions - Combines multiple rows of data into 1 number*/
@@ -199,3 +199,33 @@ SELECT
 	1.0 * COUNT(CASE WHEN Last_Statement LIKE '%innocent%'
 				THEN 1 ELSE NULL END) / COUNT(*)
 FROM tx_deathrow;
+
+/*Ch 3 The Long Tail
+Small # of samples that occur many times
+Plot them results in arch with curve right of center of mass, resembling a tail
+Tail shows outliers that you might investigate
+For this dataset, long tail = few counties that perform lots of executions
+Shape of tables reveals what operations must be performed
+Can't use the aggregations from chap 2 because they would result in only 1 row 
+when we want 1 row per county
+
+GROUP BY
+- Comes after WHERE block
+- Splits data and applies aggregate functions w/in each group = 1 row per group
+
+Find execution counts per county - ANSWER returns 92 rows*/
+SELECT
+	county,
+	COUNT(*) AS county_executions
+FROM tx_deathrow
+GROUP BY county;
+
+/*Count executions w/ & w/o last statements. Organize by county. 1=TRUE, 0=FALSE
+ANSWER - 110 have no last statement, 443 have last statement*/
+SELECT
+	Last_Statement IS NOT NULL AS has_last_statement,
+	COUNT(*)
+FROM tx_deathrow
+GROUP BY has_last_statement;
+
+
