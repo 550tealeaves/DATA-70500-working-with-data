@@ -199,4 +199,3 @@ SELECT
 	1.0 * COUNT(CASE WHEN Last_Statement LIKE '%innocent%'
 				THEN 1 ELSE NULL END) / COUNT(*)
 FROM tx_deathrow;
-
