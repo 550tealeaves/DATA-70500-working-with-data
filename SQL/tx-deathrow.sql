@@ -200,7 +200,7 @@ SELECT
 				THEN 1 ELSE NULL END) / COUNT(*)
 FROM tx_deathrow;
 
-/*Ch 3 The Long Tail
+/*Ch 3 THE LONG TAIL
 Small # of samples that occur many times
 Plot them results in arch with curve right of center of mass, resembling a tail
 Tail shows outliers that you might investigate
@@ -228,4 +228,94 @@ SELECT
 FROM tx_deathrow
 GROUP BY has_last_statement;
 
+/*The HAVING block
+- Used if you want to filter on the result of the grouping and aggregation*/
 
+/*Count the number of inmates aged 50 or older that were executed in each county*/
+/*Using WHERE block*/
+SELECT
+	County, COUNT(*)
+FROM tx_deathrow
+WHERE Age_at_Execution >= 50
+GROUP BY County;
+
+SELECT
+	COUNT(CASE WHEN Age_at_Execution >= 50 THEN 1
+		ELSE 0 END)
+FROM tx_deathrow;
+
+/*List the counties in which more than 2 inmates aged 50 or older have been executed.
+This builds on the previous exercise. 
+We need an additional filter—one that uses the result of the aggregation. 
+This means it cannot exist in the WHERE block because those filters are run before aggregation. 
+Look up the HAVING block. You can think of it as a post-aggregation WHERE block.*/
+SELECT
+	County
+FROM tx_deathrow
+WHERE Age_at_Execution >= 50
+GROUP BY County
+HAVING COUNT(*) > 2;
+
+/*List the counties & totals of those w/ more than 2 executions*/
+SELECT
+	County, COUNT(*)
+FROM tx_deathrow
+WHERE Age_at_Execution >= 50
+GROUP BY County
+HAVING COUNT(*) > 2;
+
+/*query finds the number of inmates from each county and 10 year age range.*/
+SELECT
+	County,
+  Age_at_Execution/10 AS decade_age,
+  COUNT(*)
+FROM tx_deathrow
+GROUP BY County, decade_age
+
+/*List all the distinct counties in the dataset.
+We did this in the previous chapter using the SELECT DISTINCT command. 
+This time, stick with vanilla SELECT and use GROUP BY.*/
+SELECT DISTINCT(County)
+FROM tx_deathrow
+GROUP BY County;
+
+/*NESTED QUERIES*/
+-- SELECT 
+-- 	County, PERCENT_COUNT(*)
+-- FROM tx_deathrow
+-- GROUP BY County;
+/*Percentage doesn't exist as a metric b/c function needs to aggregate both w/in groups (for numerator)
+and throughout dataset (to get denominator)
+Require 2 diff queries - 1st that aggregates w/ GROUP BY & 2nd that aggregates w/o = NESTING*/
+
+/*Find the first and last name of the inmate with the longest last statement (by character count).
+Write in a suitable query to nest in <length-of-longest-last-statement>.*/
+SELECT first_name, last_name
+FROM tx_deathrow
+WHERE LENGTH(last_statement) =
+    (SELECT MAX(LENGTH(Last_Statement))  /*2nd query must have SELECT & FROM*/
+	FROM tx_deathrow)
+	
+/*Nesting is needed b/c for WHERE clause, while computer inspects a row to decide if its last 
+statement, it can't look outside to determine max length across full dataset.
+Must find the max length separately and feed it into clause*/
+
+/*Insert the <count-of-all-rows> query to find the percentage of executions from each county.
+100.0 is a decimal so we can get decimal percentages.*/
+/*The second query must have SELECT & FROM with dataset - list dataset 2x here*/
+SELECT 
+	County,
+	100.0 * COUNT(*) / (SELECT COUNT(*) FROM tx_deathrow)
+	AS percentage
+FROM tx_deathrow
+GROUP BY County
+ORDER BY percentage DESC;
+
+/*Round above to nearest hundreths place - add ROUND and 2*/
+SELECT 
+	County,
+	ROUND(100.0 * COUNT(*) / (SELECT COUNT(*) FROM tx_deathrow), 2)
+	AS percentage
+FROM tx_deathrow
+GROUP BY County
+ORDER BY percentage DESC;
