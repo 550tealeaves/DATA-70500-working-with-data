@@ -311,7 +311,7 @@ FROM tx_deathrow
 GROUP BY County
 ORDER BY percentage DESC;
 
-/*Round above to nearest hundreths place - add ROUND and 2*/
+/*Round above to nearest hundredths place - add ROUND and 2*/
 SELECT 
 	County,
 	ROUND(100.0 * COUNT(*) / (SELECT COUNT(*) FROM tx_deathrow), 2)
