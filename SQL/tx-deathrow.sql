@@ -290,7 +290,7 @@ Require 2 diff queries - 1st that aggregates w/ GROUP BY & 2nd that aggregates w
 
 /*Find the first and last name of the inmate with the longest last statement (by character count).
 Write in a suitable query to nest in <length-of-longest-last-statement>.*/
-SELECT first_name, last_name
+SELECT first_name, last_name, Last_Statement
 FROM tx_deathrow
 WHERE LENGTH(last_statement) =
     (SELECT MAX(LENGTH(Last_Statement))  /*2nd query must have SELECT & FROM*/
@@ -319,3 +319,25 @@ SELECT
 FROM tx_deathrow
 GROUP BY County
 ORDER BY percentage DESC;
+
+/*DATES
+SQLite doesn't have date or time types so most dates function as just strings. But it does have functions
+Ex: JULIANDAY() - returns fractional # of days since noon of Greenwich in BC*/
+/*Return # of days b/w these 2 dates*/
+SELECT julianday('1993-08-10') - julianday('1989-07-07') AS day_difference
+
+/*Find the length of last statements - filter out NULL*/
+SELECT
+LENGTH (Last_Statement)
+FROM tx_deathrow
+WHERE Last_Statement IS NOT NULL
+ORDER BY Last_Statement ASC;
+
+/*Select first/last name of inmate w/ shortest last statement & include statement 
+First select name & statement columns
+Then in nested query, include new select & from clauses*/
+SELECT First_Name, Last_Name, Last_Statement
+FROM tx_deathrow
+WHERE LENGTH (Last_Statement) = 
+		(SELECT MIN(LENGTH(Last_Statement))
+		FROM tx_deathrow)
